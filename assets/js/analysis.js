@@ -47,7 +47,7 @@ let drawBuildings = function (buildings) {
     for (var i = 0; i < buildings.length; i++) {
         let bg = buildings[i].geometry;
         var latLng = L.latLng([bg[0].lat, bg[0].lon]);
-        L.circleMarker(latLng, { radius: 2, color: 'blue', fillOpacity: 1 }).addTo(map);
+        L.circleMarker(latLng, { radius: 2, color: 'blue', fillOpacity: 1 }).addTo(buildingFeatures);
         // L.marker(latLng).addTo(buildingFeatures);
 
     }
@@ -66,9 +66,9 @@ let drawRoads = function (roads) {
             roadLtLns.push([r.lat, r.lon]);
         });
         if(roads[i].tags==='residential'){
-            var road = L.polyline(roadLtLns, { color: "red", weight: 1 }).addTo(roadFeatures);
+            var road = L.polyline(roadLtLns, { color: "blue", weight: 1 }).addTo(roadFeatures);
         }else{
-            var road = L.polyline(roadLtLns, { color: "red", weight: 5 }).addTo(roadFeatures);
+            var road = L.polyline(roadLtLns, { color: "blue", weight: 5 }).addTo(roadFeatures);
         }
         
         
