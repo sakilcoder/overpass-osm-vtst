@@ -55,8 +55,8 @@ map.on(L.Draw.Event.CREATED, function (e) {
         let bbox=layer.getBounds();
 
         fetchBuildingData(bbox);
-        fetchPrimaryRoadData(bbox);
-
+        
+        
         
     }
 
