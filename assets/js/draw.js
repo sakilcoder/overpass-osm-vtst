@@ -16,23 +16,23 @@ var options = {
     draw: {
         polyline: false,
         rectangle: {
-            allowIntersection: false, // Restricts shapes to simple polygons
+            allowIntersection: false,
             drawError: {
-                color: '#e1e100', // Color the shape will turn when intersects
-                message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+                color: '#e1e100', 
+                message: '<strong>Oh snap!<strong> you can\'t draw that!' 
             },
             shapeOptions: {
                 color: '#bada55'
             }
         },
-        circle: false, // Turns off this drawing tool
+        circle: false, 
         polygon: false,
         marker: {
             icon: new MyCustomMarker()
         }
     },
     edit: {
-        featureGroup: editableLayers, //REQUIRED!!
+        featureGroup: editableLayers, 
         edit: false
         // remove: false
     }

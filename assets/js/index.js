@@ -11,6 +11,10 @@ var googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={
     subdomains:['mt0','mt1','mt2','mt3']
 });
 
+let roadjs={
+    "type": "FeatureCollection",
+    "features": []
+  }
 // map.on('click', function(e){
 //     console.log(e);
 // });
