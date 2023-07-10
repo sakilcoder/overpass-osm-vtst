@@ -13,6 +13,14 @@ let fetchBuildingData = function (bounds) {
         .then(data => {
             const buildings = data.elements.filter(element => element.type === 'way');
             // console.log(buildings);
+            roadjs = {
+                "type": "FeatureCollection",
+                "features": []
+            }
+            buildingjs = {
+                "type": "FeatureCollection",
+                "features": []
+            }
             drawBuildings(buildings);
             fetchPrimaryRoadData(bounds);
         })
@@ -115,6 +123,14 @@ let drawBuildings = function (buildings) {
         L.circleMarker(latLng, { radius: 2, color: 'blue', fillOpacity: 1 }).addTo(buildingFeatures);
         // L.marker(latLng).addTo(buildingFeatures);
 
+        let b = {
+            "type": "Feature",
+            "geometry": {
+              "coordinates": [bg[0].lon, bg[0].lat],
+              "type": "Point"
+            }
+          }
+          buildingjs.features.push(b);
     }
 }
 

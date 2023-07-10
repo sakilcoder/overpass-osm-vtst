@@ -1,12 +1,18 @@
-#map {
+body{
+    /* background-color: cadetblue; */
+}
+
+#gmap {
     height: 400px;
     margin: 5px 0;
 }
 
-#map {
+#smap {
     width: 100%;
     height: 400px;
     margin: 5px 0;
+    padding: 3px;
+    background-color: #c5c5c5;
 }
 
 .leaflet-control-attribution {

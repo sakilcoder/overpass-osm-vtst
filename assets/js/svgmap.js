@@ -1,43 +1,59 @@
 
 
+let getStrokeWidth = function (road) {
+    if (road === 'connecting')
+        return 1;
+    else if (road === 'residential')
+        return 3;
+    else
+        return 5;
+}
+
 let drawSvgMap = function () {
-    console.log('ellepo');
+console.log(buildingjs);
+    document.getElementById('smap').innerHTML = '<svg id="svgmap" style="width: 100%; height: 400px"></svg>';
 
-    const width = document.getElementById('svgmap').clientWidth;
-    const height = 400;
+    var body = d3.select("body").node().getBoundingClientRect();
+    var w = body.width;
+    var h = 400;
 
-    // Create an SVG element within the map container
-    const svg = d3.select('#svgmap')
-        .append('svg')
-        .attr('width', width)
-        .attr('height', height);
-
+    const svg = d3.select('#svgmap');
     const projection = d3.geoMercator()
-        .fitSize([width, height], roadjs)
-        .translate([width / 2, height / 2]);
+        .fitSize([w, h], roadjs);
 
-    // Create a path generator
-    const path = d3.geoPath().projection(projection);
-
-    const transformedGeojson = {
-        ...roadjs,
-        features: roadjs.features.map(feature => ({
-            ...feature,
-            geometry: {
-                ...feature.geometry,
-                coordinates: feature.geometry.coordinates.map(coords => projection(coords))
-            }
-        }))
-    };
-
-    // Draw the map
     svg.selectAll('path')
         .data(roadjs.features)
         .enter()
         .append('path')
-        .attr('d', path)
-        .style('fill', 'steelblue')
-        .style('stroke', 'black')
-        .style('stroke-width', 5);
+        .attr('d', d3.geoPath().projection(projection))
+        .attr('fill', 'none')
+        .attr('stroke', 'blue')
+        .attr('stroke-width', function (d) {
+            var road = d.properties.name;
+            return getStrokeWidth(road);
+        });
 
+        svg.selectAll('text')
+              .data(buildingjs.features)
+              .enter()
+              .append('text')
+              .attr('x', d => projection(d.geometry.coordinates)[0])
+              .attr('y', d => projection(d.geometry.coordinates)[1])
+              .attr('text-anchor', 'middle')
+              .attr('alignment-baseline', 'middle')
+              .attr('fill', 'red')
+              .text('x');
+
+    // svg.selectAll('circle')
+    //     .data(buildingjs.features)
+    //     .enter()
+    //     .append('circle')
+    //     .attr('cx', d => projection(d.geometry.coordinates)[0])
+    //     .attr('cy', d => projection(d.geometry.coordinates)[1])
+    //     .attr('r', 4)
+    //     .attr('fill', 'red')
+    //     .attr('stroke', 'white')
+    //     .attr('stroke-width', 1);
+
+    svg.node();
 }
