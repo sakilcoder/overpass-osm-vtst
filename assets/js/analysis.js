@@ -1,5 +1,7 @@
 
-let fetchBuildingData = function (bounds) {
+
+
+let fetchBuildingData = function (bounds, poly) {
     const overpassQuery = `
     [out:json];
     way["building"](${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()});
@@ -21,15 +23,16 @@ let fetchBuildingData = function (bounds) {
                 "type": "FeatureCollection",
                 "features": []
             }
-            drawBuildings(buildings);
-            fetchPrimaryRoadData(bounds);
+            let filteredBuildings = filterBuildings(buildings, poly);
+            drawBuildings(filteredBuildings);
+            fetchPrimaryRoadData(bounds, poly);
         })
         .catch(error => {
             console.error('Error fetching OSM data:', error);
         });
 }
 
-let fetchPrimaryRoadData = function (bounds) {
+let fetchPrimaryRoadData = function (bounds, polygon) {
     const overpassQuery = `
     [out:json];
     way["highway"](${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()});
@@ -42,7 +45,8 @@ let fetchPrimaryRoadData = function (bounds) {
         .then(response => response.json())
         .then(data => {
             let roads = data.elements;
-            drawRoads(roads);
+            let filteredRoads = filterRoads(roads, bounds);
+            // drawRoads(filteredRoads);
             drawBuildingConnectedRoads();
         })
         .catch(error => {
@@ -77,89 +81,94 @@ let fetchSecondaryRoadData = function (bounds) {
         });
 }
 
-let buildingRoads = new L.FeatureGroup().addTo(map);
+
 let drawBuildingConnectedRoads = function () {
     buildingRoads.clearLayers();
     buildingFeatures.eachLayer(function (marker) {
+        // console.log(marker);
         let nearestPoints = [];
         roadFeatures.eachLayer(function (road) {
-            // console.log(road.toGeoJSON());
+            // console.log(road);
             var nearestLine = turf.nearestPointOnLine(road.toGeoJSON(), marker.toGeoJSON());
             nearestPoints.push(turf.point(nearestLine.geometry.coordinates))
         });
 
         const nearestPoint = turf.nearestPoint(marker.toGeoJSON(), turf.featureCollection(nearestPoints));
 
-        let feature = {
-            type: 'Feature',
-            geometry: {
-                type: 'LineString',
-                coordinates: [
-                    marker.toGeoJSON().geometry.coordinates,
-                    nearestPoint.geometry.coordinates
-                ]
-            },
-            properties: {
-                color: 'blue',
-                weight: 1,
-                name: 'connecting'
+        var distance = turf.distance(turf.point(marker.toGeoJSON().geometry.coordinates), turf.point(nearestPoint.geometry.coordinates), { units: 'meters' });
+        if (distance < 40) {
+            let feature = {
+                type: 'Feature',
+                geometry: {
+                    type: 'LineString',
+                    coordinates: [
+                        marker.toGeoJSON().geometry.coordinates,
+                        nearestPoint.geometry.coordinates
+                    ]
+                },
+                properties: {
+                    color: 'blue',
+                    weight: 1,
+                    name: 'connecting'
+                }
             }
+            var connectingLine = L.geoJSON(feature).addTo(buildingRoads);
+            roadjs.features.push(feature);
         }
-        var connectingLine = L.geoJSON(feature).addTo(buildingRoads);
-        roadjs.features.push(feature);
+
+
 
     });
 
     drawSvgMap();
 }
 
-let buildingFeatures = new L.FeatureGroup().addTo(map);
-let drawBuildings = function (buildings) {
-    // console.log(buildings);
-    buildingFeatures.clearLayers();
-    for (var i = 0; i < buildings.length; i++) {
-        let bg = buildings[i].geometry;
-        var latLng = L.latLng([bg[0].lat, bg[0].lon]);
-        L.circleMarker(latLng, { radius: 2, color: 'blue', fillOpacity: 1 }).addTo(buildingFeatures);
-        // L.marker(latLng).addTo(buildingFeatures);
 
+let drawBuildings = function (buildings) {
+    buildingFeatures.clearLayers();
+    const circleMarker = L.geoJSON(buildings, {
+        pointToLayer: function (feature, latlng) {
+            L.circleMarker([latlng.lng, latlng.lat], { radius: 2, color: 'blue', fillOpacity: 1 }).addTo(buildingFeatures);
+        }
+    });
+
+    for (var i = 0; i < buildings.features.length; i++) {
         let b = {
             "type": "Feature",
             "geometry": {
-              "coordinates": [bg[0].lon, bg[0].lat],
-              "type": "Point"
+                "coordinates": [buildings.features[i].geometry.coordinates[1], buildings.features[i].geometry.coordinates[0]],
+                "type": "Point"
             }
-          }
-          buildingjs.features.push(b);
+        }
+        buildingjs.features.push(b);
     }
 }
 
-let roadFeatures = new L.FeatureGroup().addTo(map);
 let drawRoads = function (roads) {
     // console.log(roads);
     roadFeatures.clearLayers();
 
-    for (var i = 0; i < roads.length; i++) {
-        let rg = roads[i].geometry;
-        let roadLtLns = [];
-        // console.log(roads[i].tags.highway);
-        rg.forEach(r => {
-            // console.log(r);
-            roadLtLns.push([r.lat, r.lon]);
-        });
-        if (roads[i].tags.highway === 'residential') {
-            var road = L.polyline(roadLtLns, { color: "blue", weight: 2 }).addTo(roadFeatures);
-            let feature = road.toGeoJSON();
-            feature.properties.name = 'residential';
-            roadjs.features.push(feature);
-        } else {
-            var road = L.polyline(roadLtLns, { color: "blue", weight: 4 }).addTo(roadFeatures);
-            let feature = road.toGeoJSON();
-            feature.properties.name = 'primary';
-            roadjs.features.push(feature);
-        }
+    // for (var i = 0; i < roads.length; i++) {
+    //     let rg = roads[i].geometry;
+    //     let roadLtLns = [];
+    //     // console.log(roads[i].tags.highway);
+    //     rg.forEach(r => {
+    //         // console.log(r);
+    //         roadLtLns.push([r.lat, r.lon]);
+    //     });
+    //     if (roads[i].tags.highway === 'residential') {
+    //         var road = L.polyline(roadLtLns, { color: "blue", weight: 2 }).addTo(roadFeatures);
+    //         let feature = road.toGeoJSON();
+    //         feature.properties.name = 'residential';
+    //         roadjs.features.push(feature);
+    //     } else {
+    //         var road = L.polyline(roadLtLns, { color: "blue", weight: 4 }).addTo(roadFeatures);
+    //         let feature = road.toGeoJSON();
+    //         feature.properties.name = 'primary';
+    //         roadjs.features.push(feature);
+    //     }
 
 
-    }
+    // }
 
 }

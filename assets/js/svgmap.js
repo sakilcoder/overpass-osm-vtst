@@ -1,5 +1,3 @@
-
-
 let getStrokeWidth = function (road) {
     if (road === 'connecting')
         return 1;
@@ -10,7 +8,7 @@ let getStrokeWidth = function (road) {
 }
 
 let drawSvgMap = function () {
-console.log(buildingjs);
+    // console.log(buildingjs.features[0].geometry.coordinates[1]);
     document.getElementById('smap').innerHTML = '<svg id="svgmap" style="width: 100%; height: 400px"></svg>';
 
     var body = d3.select("body").node().getBoundingClientRect();
@@ -33,16 +31,16 @@ console.log(buildingjs);
             return getStrokeWidth(road);
         });
 
-        svg.selectAll('text')
-              .data(buildingjs.features)
-              .enter()
-              .append('text')
-              .attr('x', d => projection(d.geometry.coordinates)[0])
-              .attr('y', d => projection(d.geometry.coordinates)[1])
-              .attr('text-anchor', 'middle')
-              .attr('alignment-baseline', 'middle')
-              .attr('fill', 'red')
-              .text('x');
+    svg.selectAll('text')
+        .data(buildingjs.features)
+        .enter()
+        .append('text')
+        .attr('x', d => projection(d.geometry.coordinates)[0])
+        .attr('y', d => projection(d.geometry.coordinates)[1])
+        .attr('text-anchor', 'middle')
+        .attr('alignment-baseline', 'middle')
+        .attr('fill', 'red')
+        .text('x');
 
     // svg.selectAll('circle')
     //     .data(buildingjs.features)

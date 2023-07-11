@@ -26,7 +26,7 @@ var options = {
             }
         },
         circle: false, 
-        polygon: false,
+        polygon: true,
         marker: {
             icon: new MyCustomMarker()
         }
@@ -54,7 +54,7 @@ map.on(L.Draw.Event.CREATED, function (e) {
 
         let bbox=layer.getBounds();
 
-        fetchBuildingData(bbox);
+        fetchBuildingData(bbox, layer);
         
         
         
